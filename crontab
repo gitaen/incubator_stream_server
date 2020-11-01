@@ -8,13 +8,15 @@ SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 # m h dom mon dow user	command
-#* * * * * root incubatorlogger.py
-#*/10 * * * * root tail -n 720 /tmp/incubatorlog.txt | fileplotter.py /tmp/temp.png Temperature 4 5
-#*/10 * * * * root tail -n 720 /tmp/incubatorlog.txt | fileplotter.py /tmp/humid.png 'Relative Humidity' 8 9
-#*/10 * * * * root tail -n 720 /tmp/incubatorlog.txt | fileplotter.py /tmp/heater.png 'Heater Power' 6
-#*/10 * * * * root tail -n 720 /tmp/incubatorlog.txt | fileplotter.py /tmp/humidifier.png 'Humidifier Power' 10
+* * * * * root incubatorlogger.py
+#* 9-23 * * * pi tail -n 1 /tmp/incubatorlog.txt | notifier.sh
+0,10,20,30,40 * * * * root tail -n 720 /tmp/incubatorlog.txt | fileplotter.py /tmp/temp.png Temperature 4 5
+2,12,22,32,42 * * * * root tail -n 720 /tmp/incubatorlog.txt | fileplotter.py /tmp/humid.png 'Relative Humidity' 8 9
+4,14,24,34,44 * * * * root tail -n 720 /tmp/incubatorlog.txt | fileplotter.py /tmp/heater.png 'Heater Power' 6
+8,18,28,38,48 * * * * root tail -n 720 /tmp/incubatorlog.txt | fileplotter.py /tmp/humidifier.png 'Humidifier Power' 10
 17 *	* * *	root    cd / && run-parts --report /etc/cron.hourly
 25 6	* * *	root	test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )
 47 6	* * 7	root	test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )
 52 6	1 * *	root	test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )
 #
+2,7,12,17,22,27,32,37,42,47,52,57 * * * * pi sleep 17 ; wget --no-check-certificate -O - https://freedns.afraid.org/dynamic/update.php?NlFobmlBd1R3VEF4SExqSGlhVVJpaHhZOjEwOTEzNjU3 >> /tmp/freedns_pollo-o-matic_us_to.log 2>&1 &

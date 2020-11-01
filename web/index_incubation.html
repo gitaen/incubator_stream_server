@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>pollo-o-matic</title>
+	<meta http-equiv="refresh" content="600">
+    </head>
+    <body>
+      <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+      <h1>Pollo-o-Matic!</h1>
+      <h2 id="countdown"></h2>
+      <video id="video" autoplay controls></video><br>
+      <IMG SRC="temp.png" ALT="Temperature chart"><br>
+      <IMG SRC="humid.png" ALT="Relative Humidity chart"><br>
+    </body>
+<script language="JavaScript" src="countdown.js"></script>
+<script>CountDownTimer('2018-05-26T09:00:00+0200', 'countdown');</script>
+<script>
+  if(Hls.isSupported()) {
+  var video = document.getElementById('video');
+  var hls = new Hls();
+  hls.loadSource('hls/index.m3u8');
+  hls.attachMedia(video);
+  hls.on(Hls.Events.MANIFEST_PARSED,function() {
+  video.play();
+  });
+  }
+  // hls.js is not supported on platforms that do not have Media Source Extensions (MSE) enabled.
+  // When the browser has built-in HLS support (check using `canPlayType`), we can provide an HLS manifest (i.e. .m3u8 URL) directly to the video element throught the `src` property.
+  // This is using the built-in support of the plain video element, without using hls.js.
+  else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+  video.src = 'hls/index.m3u8';
+  video.addEventListener('canplay',function() {
+  video.play();
+  });
+  }
+</script>
+</html>

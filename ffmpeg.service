@@ -1,0 +1,18 @@
+	[Unit]
+Description=ffmmpeg hls encoder
+
+[Service]
+User=ffmpeg
+Group=video
+ExecStartPre=/bin/mkdir -p /var/run/ffmpeg
+ExecStartPre=/bin/chown ffmpeg.ffmpeg /var/run/ffmpeg
+ExecStart=/usr/bin/ffmpeg -f v4l2 -video_size 640x360 -framerate 25 -input_format yuyv422 -i /dev/video0 -vf drawtext="x=w/100:y=h*dar/100:fontfile=FreeSans.ttf:text='%{localtime}':fontcolor=white:box=1:boxcolor=black@0.5:boxborderw=5" -c:v h264_omx -keyint_min 1 -g 100 -b:v 500k -f segment -segment_list_flags live -segment_wrap 20 -segment_time 2.0 -segment_format mpegts -segment_list_size 2 -segment_list /var/run/ffmpeg/index.m3u8  "/var/run/ffmpeg/segment%04d.ts"
+#ExecStart=/usr/bin/ffmpeg -f v4l2 -video_size 640x360 -framerate 25 -input_format yuyv422 -i /dev/video0 -vf drawtext="x=w/100:y=h*dar/100:fontfile=FreeSans.ttf:textfile=/var/run/ffmpeg/remaining.txt:reload=1:fontcolor=white:box=1:boxcolor=black@0.5:boxborderw=5" -c:v h264_omx -keyint_min 1 -g 100 -b:v 500k -f segment -segment_list_flags live -segment_wrap 20 -segment_time 2.0 -segment_format mpegts -segment_list_size 2 -segment_list /var/run/ffmpeg/index.m3u8  "/var/run/ffmpeg/segment%04d.ts"
+#ExecStart=/usr/bin/ffmpeg -f v4l2 -video_size 640x360 -framerate 25 -input_format yuyv422 -i /dev/video0 -c:v h264_omx -keyint_min 1 -g 100 -b:v 200k -f segment -segment_list_flags live -segment_wrap 20 -segment_time 2.0 -segment_format mpegts -segment_list_size 2 -segment_list /var/run/ffmpeg/index.m3u8 "/var/run/ffmpeg/segment%04d.ts"
+#-c:v h264_omx -keyint_min 1 -g 100 -b:v 50k -f segment -segment_list_flags live -segment_wrap 20 -segment_time 2.0 -segment_format mpegts -segment_list_size 5 -segment_list /var/run/ffmpeg/index_low.m3u8 "/var/run/ffmpeg/segment_low%04d.ts"
+Restart=always
+RestartSec=30s
+PermissionsStartOnly=true
+
+[Install]
+WantedBy=multi-user.target
