@@ -10,9 +10,9 @@ client = MongoClient()
 db = client.incubator
 collection = db.log
 
-ser.write('G')
+ser.write('G'.encode())
 while ser.inWaiting() == 0:
-        ser.write('G')
+        ser.write('G'.encode())
         time.sleep(1)
 
 line = ser.readline()
