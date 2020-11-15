@@ -12,7 +12,7 @@ collection = db.log
 
 ser.write('G')
 while ser.inWaiting() == 0:
-	ser.write('G')
+        ser.write('G')
         time.sleep(1)
 
 line = ser.readline()
