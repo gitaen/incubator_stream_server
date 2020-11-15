@@ -19,7 +19,7 @@ line = ser.readline()
 
 (uptime,
  tempSensor, tempTarget, tempPower, tempStatus,
- humidSensor, humidTarget, humidPower, humidstatus,
+ humidSensor, humidTarget, humidPower, humidStatus,
  turnerState, turnerActive, turnerTimeLeft, turnerStatus) = line.split()
 
 logLine = {"TimeStamp" : datetime.utcnow(),
