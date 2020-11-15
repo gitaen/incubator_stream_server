@@ -22,7 +22,7 @@ line = ser.readline()
  humidSensor, humidTarget, humidPower, humidstatus,
  turnerState, turnerActive, turnerTimeLeft, turnerStatus) = line.split()
 
-logLine = {"TimeStamp" : datetime.datetime.utcnow(),
+logLine = {"TimeStamp" : datetime.utcnow(),
            "Uptime" : int(uptime),
            "Temperature" : { "Current" : float(tempSensor),
                              "Target" : float(tempTarget),
