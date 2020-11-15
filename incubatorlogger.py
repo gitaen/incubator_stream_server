@@ -34,8 +34,8 @@ logLine = {"TimeStamp" : datetime.utcnow(),
                           "StatusOK" : bool(humidStatus)},
            "Turner" : { "State" : bool(turnerState),
                         "Active" : bool(turnerActive),
-                        "TimeLeft" : int(TurnetTimeLeft),
-                        "StatusOK" : bool(turnetStatus)}
+                        "TimeLeft" : int(turnerTimeLeft),
+                        "StatusOK" : bool(turnerStatus)}
            }
 
 collection.insert_one(logLine)
