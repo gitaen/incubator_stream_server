@@ -24,11 +24,11 @@ line = ser.readline()
 
 logLine = {"TimeStamp" : datetime.utcnow(),
            "Uptime" : int(uptime),
-           "Temperature" : { "Current" : float(tempSensor),
+           "Temperature" : { "Measurement" : float(tempSensor),
                              "Target" : float(tempTarget),
                              "Power" : int(tempPower),
                              "StatusOK" : bool(tempStatus)},
-           "Humidity" : { "Current" : float(humidSensor),
+           "Humidity" : { "Measurement" : float(humidSensor),
                           "Target" : float(humidTarget),
                           "Power" : int(humidPower),
                           "StatusOK" : bool(humidStatus)},
