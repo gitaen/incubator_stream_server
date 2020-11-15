@@ -1,12 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import serial
-import sys
-import datetime as dt
+from pymongo import MongoClient
+from datetime import datetime
 import time
 
 ser = serial.Serial('/dev/ttyACM0', 115200)
-logfile = open('/tmp/incubatorlog.txt','a')
+client = MongoClient()
+db = client.incubator
+collection = db.log
 
 ser.write('G')
 while ser.inWaiting() == 0:
@@ -14,6 +16,26 @@ while ser.inWaiting() == 0:
         time.sleep(1)
 
 line = ser.readline()
-logfile.write(str(dt.datetime.now()) + ' ')
-logfile.write(line)
-logfile.close()
+
+(uptime,
+ tempSensor, tempTarget, tempPower, tempStatus,
+ humidSensor, humidTarget, humidPower, humidstatus,
+ turnerState, turnerActive, turnerTimeLeft, turnerStatus) = line.split()
+
+logLine = {"TimeStamp" : datetime.datetime.utcnow(),
+           "Uptime" : int(uptime),
+           "Temperature" : { "Current" : float(tempSensor),
+                             "Target" : float(tempTarget),
+                             "Power" : int(tempPower),
+                             "StatusOK" : bool(tempStatus)},
+           "Humidity" : { "Current" : float(humidSensor),
+                          "Target" : float(humidTarget),
+                          "Power" : int(humidPower),
+                          "StatusOK" : bool(humidStatus)},
+           "Turner" : { "State" : bool(turnerState),
+                        "Active" : bool(turnerActive),
+                        "TimeLeft" : int(TurnetTimeLeft),
+                        "StatusOK" : bool(turnetStatus)}
+           }
+
+collection.insert_one(logLine)
