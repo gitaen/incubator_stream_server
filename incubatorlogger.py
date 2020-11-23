@@ -55,4 +55,4 @@ points = [
         }
 ]
 
-client.writepoints(points)
+client.write_points(points)
