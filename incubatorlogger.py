@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 
 import serial
-from pymongo import MongoClient
-from datetime import datetime
+from influxdb import InfluxDBClient
 import time
 
 ser = serial.Serial('/dev/ttyACM0', 115200)
-client = MongoClient()
-db = client.incubator
-collection = db.log
+client = InfluxDBClient(database='incubator')
 
 ser.write('G'.encode())
 while ser.inWaiting() == 0:
@@ -22,20 +19,40 @@ line = ser.readline()
  humidSensor, humidTarget, humidPower, humidStatus,
  turnerState, turnerActive, turnerTimeLeft, turnerStatus) = line.split()
 
-logLine = {"TimeStamp" : datetime.utcnow(),
-           "Uptime" : int(uptime),
-           "Temperature" : { "Measurement" : float(tempSensor),
-                             "Target" : float(tempTarget),
-                             "Power" : int(tempPower),
-                             "StatusOK" : bool(tempStatus)},
-           "Humidity" : { "Measurement" : float(humidSensor),
-                          "Target" : float(humidTarget),
-                          "Power" : int(humidPower),
-                          "StatusOK" : bool(humidStatus)},
-           "Turner" : { "State" : bool(turnerState),
-                        "Active" : bool(turnerActive),
-                        "TimeLeft" : int(turnerTimeLeft),
-                        "StatusOK" : bool(turnerStatus)}
-           }
+points = [
+        {
+                "measurement" : "uptime",
+                "fields" : {
+                        "value" : int(uptime)
+                }
+        },
+        {
+                "measurement" : "temperature",
+                "fields" : {
+                        "value" : float(tempSensor),
+                        "target" : float(tempTarget),
+                        "power" : int(tempPower),
+                        "status" : bool(tempStatus)
+                }
+        },
+        {
+                "measurement" : "humidity",
+                "fields" : {
+                        "value" : float(humidSensor),
+                        "target" : float(humidTarget),
+                        "power" : int(humidPower),
+                        "status" : bool(humidStatus)
+                }
+        },
+        {
+                "measurement" : "turner",
+                "fields" : {
+                        "state" : bool(turnerState),
+                        "active" : bool(turnerActive),
+                        "time_left" : int(turnerTimeLeft),
+                        "status" : bool(turnerStatus)
+                }
+        }
+]
 
-collection.insert_one(logLine)
+client.writepoints(points)
