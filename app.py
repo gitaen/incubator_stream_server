@@ -8,24 +8,27 @@ import pandas as pd
 import plotly.express as px
 from influxdb import DataFrameClient
 
-PERIOD='1h'
+PERIOD='1w'
 
 client = DataFrameClient(host='incubator.local', database='incubator')
 
 def generate_graph (measure):
-    result = client.query('select target,value from ' + measure + ' where time > now()-' + PERIOD)
-    df = list(result.values())[0]
-    df.index = df.index.tz_convert('Europe/Madrid')
-    fig = px.line(df)
+    result = client.query('select * from ' + measure + ' where time > now()-' + PERIOD)
+    try:
+        df = list(result.values())[0]
+    except IndexError:
+        graph = html.P('No ' + measure + ' data for the last ' + PERIOD)
+    else:
+        df.index = df.index.tz_convert('Europe/Madrid')
+        measure_df = df[['value','target']]
+        power_df = df[['power']]
+        fig = px.line(measure_df)
+        power_fig = px.line(power_df)
+        graph = html.Div(children=[
+            dcc.Graph(id = measure, figure=fig),
+            dcc.Graph(id = measure + 'power', figure=power_fig)])
 
-    result = client.query('select power from ' + measure + ' where time > now()-' + PERIOD)
-    df = list(result.values())[0]
-    df.index = df.index.tz_convert('Europe/Madrid')
-    power_fig = px.line(df)
-
-    return html.Div(children=[
-        dcc.Graph(id = measure, figure=fig),
-        dcc.Graph(id = measure + 'power', figure=power_fig)])
+    return graph
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
