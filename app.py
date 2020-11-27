@@ -21,7 +21,7 @@ def generate_graph (measure):
     else:
         df.index = df.index.tz_convert('Europe/Madrid')
         measure_df = df[['value','target']]
-        power_df = df[['power']]
+        power_df = df[['power']].apply(lambda x: x * 100 / 255)
         fig = px.line(measure_df)
         power_fig = px.line(power_df)
         graph = html.Div(children=[
