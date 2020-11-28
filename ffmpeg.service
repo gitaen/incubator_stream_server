@@ -1,15 +1,17 @@
-	[Unit]
+[Unit]
 Description=ffmmpeg hls encoder
 
 [Service]
-User=ffmpeg
+User=www-data
 Group=video
 ExecStartPre=/bin/mkdir -p /var/run/ffmpeg
-ExecStartPre=/bin/chown ffmpeg.ffmpeg /var/run/ffmpeg
-ExecStart=/usr/bin/ffmpeg -f v4l2 -video_size 640x360 -framerate 25 -input_format yuyv422 -i /dev/video0 -vf drawtext="x=w/100:y=h*dar/100:fontfile=FreeSans.ttf:text='%{localtime}':fontcolor=white:box=1:boxcolor=black@0.5:boxborderw=5" -c:v h264_omx -keyint_min 1 -g 100 -b:v 500k -f segment -segment_list_flags live -segment_wrap 20 -segment_time 2.0 -segment_format mpegts -segment_list_size 2 -segment_list /var/run/ffmpeg/index.m3u8  "/var/run/ffmpeg/segment%04d.ts"
-#ExecStart=/usr/bin/ffmpeg -f v4l2 -video_size 640x360 -framerate 25 -input_format yuyv422 -i /dev/video0 -vf drawtext="x=w/100:y=h*dar/100:fontfile=FreeSans.ttf:textfile=/var/run/ffmpeg/remaining.txt:reload=1:fontcolor=white:box=1:boxcolor=black@0.5:boxborderw=5" -c:v h264_omx -keyint_min 1 -g 100 -b:v 500k -f segment -segment_list_flags live -segment_wrap 20 -segment_time 2.0 -segment_format mpegts -segment_list_size 2 -segment_list /var/run/ffmpeg/index.m3u8  "/var/run/ffmpeg/segment%04d.ts"
-#ExecStart=/usr/bin/ffmpeg -f v4l2 -video_size 640x360 -framerate 25 -input_format yuyv422 -i /dev/video0 -c:v h264_omx -keyint_min 1 -g 100 -b:v 200k -f segment -segment_list_flags live -segment_wrap 20 -segment_time 2.0 -segment_format mpegts -segment_list_size 2 -segment_list /var/run/ffmpeg/index.m3u8 "/var/run/ffmpeg/segment%04d.ts"
-#-c:v h264_omx -keyint_min 1 -g 100 -b:v 50k -f segment -segment_list_flags live -segment_wrap 20 -segment_time 2.0 -segment_format mpegts -segment_list_size 5 -segment_list /var/run/ffmpeg/index_low.m3u8 "/var/run/ffmpeg/segment_low%04d.ts"
+ExecStartPre=/bin/chown www-data.www-data /var/run/ffmpeg
+ExecStart=/usr/bin/ffmpeg $@ -hide_banner -f v4l2 -video_size 1280x720 -framerate 30 -input_format yuyv422 -i /dev/video0 \
+       -c:v h264_omx -profile:v main -sc_threshold 0 -g 60 -keyint_min 60 \
+       -hls_time 4 -hls_flags delete_segments \
+       -b:v:0 800k -filter:v:0 scale=w=640:h=360:force_original_aspect_ratio=decrease -r:v:0 25\
+       -b:v:1 3500k -filter:v:1 scale=w=1280:h=720:force_original_aspect_ratio=decrease -r:v:1 30\
+       -map 0:v -map 0:v -var_stream_map "v:0 v:1" -master_pl_name index.m3u8 -hls_segment_filename "/var/run/ffmpeg/segment_%%v_%%03d.ts" "/var/run/ffmpeg/playlist_%%v.m3u8"
 Restart=always
 RestartSec=30s
 PermissionsStartOnly=true
