@@ -35,9 +35,32 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div(children=[
-    html.H4(children='US Agriculture Exports (2011)'),
+    html.Div(children=[
+        html.Video(id='video', autoPlay=True, controls=True),
+        html.Script(src='https://cdn.jsdelivr.net/npm/hls.js@latest'),
+        html.Script('''
+        var video = document.getElementById('video');
+        var videoSrc = '/stream/index.m3u8';
+        var config = {
+          capLevelOnFPSDrop: true,
+          capLevelToPlayerSize: true}
+        if (Hls.isSupported()) {
+           var hls = new Hls(config);
+           hls.loadSource(videoSrc);
+           hls.attachMedia(video);
+           hls.on(Hls.Events.MANIFEST_PARSED, function() {
+             video.play();
+           });
+        }
+        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+           video.src = videoSrc;
+           video.addEventListener('loadedmetadata', function() {
+             video.play();
+           });
+        }
+        ''')]),
     generate_graph('temperature'),
-    generate_graph('humidity')
+    generate_graph('humidity'),
 ])
 
 if __name__ == '__main__':
