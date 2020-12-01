@@ -31,13 +31,14 @@ def generate_graph (measure):
     return graph
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_scripts = ['https://cdn.jsdelivr.net/npm/hls.js@latest']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets,
+                external_scripts=external_scripts)
 
 app.layout = html.Div(children=[
     html.Div(children=[
         html.Video(id='video', autoPlay=True, controls=True),
-        html.Script(src='https://cdn.jsdelivr.net/npm/hls.js@latest'),
         html.Script('''
         var video = document.getElementById('video');
         var videoSrc = '/stream/index.m3u8';
