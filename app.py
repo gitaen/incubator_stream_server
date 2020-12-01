@@ -63,5 +63,7 @@ app.layout = html.Div(children=[
     generate_graph('humidity'),
 ])
 
+server = app.server
+
 if __name__ == '__main__':
     app.run_server(debug=True)
