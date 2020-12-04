@@ -9,7 +9,7 @@ import plotly.express as px
 from influxdb import DataFrameClient
 from dash.dependencies import Input, Output
 
-PERIOD='1w'
+PERIOD='1d'
 
 client = DataFrameClient(host='incubator.local', database='incubator')
 
