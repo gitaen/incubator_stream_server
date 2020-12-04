@@ -7,6 +7,7 @@ import dash_html_components as html
 import pandas as pd
 import plotly.express as px
 from influxdb import DataFrameClient
+from dash.dependencies import Input, Output
 
 PERIOD='1w'
 
@@ -38,31 +39,45 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets,
 
 app.layout = html.Div(children=[
     html.Div(children=[
-        html.Video(id='video', autoPlay=True, controls=True),
-        html.Script('''
-        var video = document.getElementById('video');
-        var videoSrc = '/stream/index.m3u8';
-        var config = {
-          capLevelOnFPSDrop: true,
-          capLevelToPlayerSize: true}
-        if (Hls.isSupported()) {
-           var hls = new Hls(config);
-           hls.loadSource(videoSrc);
-           hls.attachMedia(video);
-           hls.on(Hls.Events.MANIFEST_PARSED, function() {
-             video.play();
-           });
-        }
-        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-           video.src = videoSrc;
-           video.addEventListener('loadedmetadata', function() {
-             video.play();
-           });
-        }
-        ''')]),
+        html.Video(id='video', autoPlay=True, controls=True)]),
     generate_graph('temperature'),
     generate_graph('humidity'),
 ])
+
+app.clientside_callback(
+    """
+    function AttachHls(elementId) {
+        var video = document.getElementById('video');
+        var videoSrc = '/stream/index.m3u8';
+        var config = {
+            debug: true,
+            capLevelOnFPSDrop: true,
+            capLevelToPlayerSize: true}
+        if (Hls.isSupported()) {
+                var hls = new Hls(config);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                    console.log("video and hls.js are now bound together !");
+                    hls.loadSource(videoSrc);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                        console.log("manifest loaded, found " + data.levels.length + " quality level");
+                        video.play();
+                    });
+                });
+        }
+        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = videoSrc;
+                video.addEventListener('loadedmetadata', function() {
+                video.play();
+                });
+        }
+    }
+    """,
+    Output('video', 'children'),
+    Input('video', 'id'),
+)
+
+
 
 server = app.server
 
