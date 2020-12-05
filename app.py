@@ -39,7 +39,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets,
 
 app.layout = html.Div(children=[
     html.Div(children=[
-        html.Video(id='video', autoPlay=True, controls=True)]),
+        html.Video(id='video', width="100%", autoPlay=True, controls=True)]),
     generate_graph('temperature'),
     generate_graph('humidity'),
 ])
