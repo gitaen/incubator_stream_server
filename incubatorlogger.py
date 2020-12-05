@@ -32,7 +32,7 @@ points = [
                         "value" : float(tempSensor),
                         "target" : float(tempTarget),
                         "power" : int(tempPower),
-                        "status" : bool(tempStatus)
+                        "status" : bool(int(tempStatus))
                 }
         },
         {
@@ -41,16 +41,16 @@ points = [
                         "value" : float(humidSensor),
                         "target" : float(humidTarget),
                         "power" : int(humidPower),
-                        "status" : bool(humidStatus)
+                        "status" : bool(int(humidStatus))
                 }
         },
         {
                 "measurement" : "turner",
                 "fields" : {
-                        "state" : bool(turnerState),
-                        "active" : bool(turnerActive),
+                        "state" : bool(int(turnerState)),
+                        "active" : bool(int(turnerActive)),
                         "time_left" : int(turnerTimeLeft),
-                        "status" : bool(turnerStatus)
+                        "status" : bool(int(turnerStatus))
                 }
         }
 ]
