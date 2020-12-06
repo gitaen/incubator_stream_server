@@ -36,6 +36,7 @@ external_scripts = ['https://cdn.jsdelivr.net/npm/hls.js@latest']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets,
                 external_scripts=external_scripts)
+app.title = 'Pollo-o-Matic!'
 
 app.layout = html.Div(children=[
     html.H1('Pollo-o-Matic!'),
