@@ -13,7 +13,7 @@ PERIOD='1d'
 
 client = DataFrameClient(host='incubator.local', database='incubator')
 
-def generate_graph (measure):
+def generate_graph (measure, title, units, actuator):
     result = client.query('select * from ' + measure + ' where time > now()-' + PERIOD)
     try:
         df = list(result.values())[0]
@@ -23,8 +23,8 @@ def generate_graph (measure):
         df.index = df.index.tz_convert('Europe/Madrid')
         measure_df = df[['value','target']]
         power_df = df[['power']].apply(lambda x: x * 100 / 255)
-        fig = px.line(measure_df)
-        power_fig = px.line(power_df)
+        fig = px.line(measure_df, title=title)
+        power_fig = px.line(power_df, title=actuator)
         graph = html.Div(children=[
             dcc.Graph(id = measure, figure=fig),
             dcc.Graph(id = measure + 'power', figure=power_fig)])
@@ -40,8 +40,8 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets,
 app.layout = html.Div(children=[
     html.Div(children=[
         html.Video(id='video', width="100%", autoPlay=True, controls=True)]),
-    generate_graph('temperature'),
-    generate_graph('humidity'),
+    generate_graph('temperature', 'Temperature', 'C', 'Heater Power'),
+    generate_graph('humidity', 'Humidity', '%', 'Humidifier Power'),
 ])
 
 app.clientside_callback(
