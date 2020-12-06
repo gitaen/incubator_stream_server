@@ -13,7 +13,7 @@ PERIOD='1d'
 
 client = DataFrameClient(host='incubator.local', database='incubator')
 
-def generate_graph (measure, title, units, actuator):
+def generate_measurement_graph (measure, title, units, actuator):
     result = client.query('select * from ' + measure + ' where time > now()-' + PERIOD)
     try:
         df = list(result.values())[0]
@@ -31,6 +31,20 @@ def generate_graph (measure, title, units, actuator):
 
     return graph
 
+def generate_turner_graph ():
+    result = client.query('select * from turner where time > now()-' + PERIOD)
+    try:
+        df = list(result.values())[0][['time_left']]
+    except IndexError:
+        graph = html.P('No egg turner data for the last ' + PERIOD)
+    else:
+        df.index = df.index.tz_convert('Europe/Madrid')
+        fig = px.line(df, title='Egg Turner')
+        graph = dcc.Graph(id = 'egg_turner', figure=fig)
+
+    return graph
+
+
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 external_scripts = ['https://cdn.jsdelivr.net/npm/hls.js@latest']
 
@@ -42,8 +56,10 @@ app.layout = html.Div(children=[
     html.H1('Pollo-o-Matic!'),
     html.Div(children=[
         html.Video(id='video', width="100%", autoPlay=True, controls=True)]),
-    generate_graph('temperature', 'Temperature', 'C', 'Heater Power'),
-    generate_graph('humidity', 'Humidity', '%', 'Humidifier Power'),
+    generate_measurement_graph('temperature', 'Temperature', 'C', 'Heater Power'),
+    generate_measurement_graph('humidity', 'Humidity', '%', 'Humidifier Power'),
+    generate_turner_graph(),
+
 ])
 
 app.clientside_callback(
