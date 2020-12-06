@@ -38,6 +38,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets,
                 external_scripts=external_scripts)
 
 app.layout = html.Div(children=[
+    html.H1('Pollo-o-Matic!'),
     html.Div(children=[
         html.Video(id='video', width="100%", autoPlay=True, controls=True)]),
     generate_graph('temperature', 'Temperature', 'C', 'Heater Power'),
