@@ -4,34 +4,36 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import pandas as pd
 import plotly.express as px
 from influxdb import DataFrameClient
 from dash.dependencies import Input, Output
 
-PERIOD='1d'
+PERIOD = '1d'
 
 client = DataFrameClient(host='incubator.local', database='incubator')
 
-def generate_measurement_graph (measure, title, units, actuator):
-    result = client.query('select * from ' + measure + ' where time > now()-' + PERIOD)
+
+def generate_measurement_graph(measure, title, units, actuator):
+    result = client.query('select * from ' + measure + ' where time > now()-'
+                          + PERIOD)
     try:
         df = list(result.values())[0]
     except IndexError:
         graph = html.P('No ' + measure + ' data for the last ' + PERIOD)
     else:
         df.index = df.index.tz_convert('Europe/Madrid')
-        measure_df = df[['value','target']]
+        measure_df = df[['value', 'target']]
         power_df = df[['power']].apply(lambda x: x * 100 / 255)
         fig = px.line(measure_df, title=title)
         power_fig = px.line(power_df, title=actuator)
         graph = html.Div(children=[
-            dcc.Graph(id = measure, figure=fig),
-            dcc.Graph(id = measure + 'power', figure=power_fig)])
+            dcc.Graph(id=measure, figure=fig),
+            dcc.Graph(id=measure + 'power', figure=power_fig)])
 
     return graph
 
-def generate_turner_graph ():
+
+def generate_turner_graph():
     result = client.query('select * from turner where time > now()-' + PERIOD)
     try:
         df = list(result.values())[0][['time_left']]
@@ -40,19 +42,24 @@ def generate_turner_graph ():
     else:
         df.index = df.index.tz_convert('Europe/Madrid')
         fig = px.line(df, title='Egg Turner')
-        graph = dcc.Graph(id = 'egg_turner', figure=fig)
+        graph = dcc.Graph(id='egg_turner', figure=fig)
 
     return graph
 
-def serve_layout ():
+
+def serve_layout():
     return html.Div(children=[
         html.H1('Pollo-o-Matic!'),
         html.Div(children=[
-            html.Video(id='video', width="100%", autoPlay=True, controls=True)]),
-        generate_measurement_graph('temperature', 'Temperature', 'C', 'Heater Power'),
-        generate_measurement_graph('humidity', 'Humidity', '%', 'Humidifier Power'),
+            html.Video(id='video', width="100%", autoPlay=True,
+                       controls=True)]),
+        generate_measurement_graph('temperature', 'Temperature', 'C',
+                                   'Heater Power'),
+        generate_measurement_graph('humidity', 'Humidity', '%',
+                                   'Humidifier Power'),
         generate_turner_graph(),
     ])
+
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 external_scripts = ['https://cdn.jsdelivr.net/npm/hls.js@latest']
@@ -79,7 +86,8 @@ app.clientside_callback(
                     console.log("video and hls.js are now bound together !");
                     hls.loadSource(videoSrc);
                     hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                        console.log("manifest loaded, found " + data.levels.length + " quality level");
+                        console.log("manifest loaded, found " +
+                                     data.levels.length + " quality level");
                         video.play();
                     });
                 });
@@ -95,7 +103,6 @@ app.clientside_callback(
     Output('video', 'children'),
     Input('video', 'id'),
 )
-
 
 
 server = app.server
