@@ -44,6 +44,15 @@ def generate_turner_graph ():
 
     return graph
 
+def serve_layout ():
+    return html.Div(children=[
+        html.H1('Pollo-o-Matic!'),
+        html.Div(children=[
+            html.Video(id='video', width="100%", autoPlay=True, controls=True)]),
+        generate_measurement_graph('temperature', 'Temperature', 'C', 'Heater Power'),
+        generate_measurement_graph('humidity', 'Humidity', '%', 'Humidifier Power'),
+        generate_turner_graph(),
+    ])
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 external_scripts = ['https://cdn.jsdelivr.net/npm/hls.js@latest']
@@ -52,15 +61,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets,
                 external_scripts=external_scripts)
 app.title = 'Pollo-o-Matic!'
 
-app.layout = html.Div(children=[
-    html.H1('Pollo-o-Matic!'),
-    html.Div(children=[
-        html.Video(id='video', width="100%", autoPlay=True, controls=True)]),
-    generate_measurement_graph('temperature', 'Temperature', 'C', 'Heater Power'),
-    generate_measurement_graph('humidity', 'Humidity', '%', 'Humidifier Power'),
-    generate_turner_graph(),
-
-])
+app.layout = serve_layout
 
 app.clientside_callback(
     """
