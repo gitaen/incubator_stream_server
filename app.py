@@ -51,6 +51,20 @@ def generate_turner_graph():
     return graph
 
 
+def generate_uptime_graph():
+    result = client.query('select * from uptime where time > now()-' + PERIOD)
+    try:
+        df = list(result.values())[0]
+    except IndexError:
+        graph = html.P('No uptime data for the last ' + PERIOD)
+    else:
+        df.index = df.index.tz_convert('Europe/Madrid')
+        fig = px.line(df, title='Uptime')
+        graph = dcc.Graph(id='uptime', figure=fig)
+
+    return graph
+
+
 def serve_layout():
     return html.Div(children=[
         html.H1('Pollo-o-Matic!'),
@@ -65,6 +79,7 @@ def serve_layout():
         generate_measurement_graph('humidity', 'Humidity', '%',
                                    'Humidifier Power'),
         generate_turner_graph(),
+        generate_uptime_graph()
     ])
 
 
