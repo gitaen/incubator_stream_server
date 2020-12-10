@@ -1,6 +1,8 @@
 # Run this app with `python app.py` and
 # visit http://127.0.0.1:8050/ in your web browser.
 
+from datetime import date, datetime, timedelta
+from dateutil import tz
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -8,7 +10,9 @@ import plotly.express as px
 from influxdb import DataFrameClient
 from dash.dependencies import Input, Output
 
+STARTING_DATE = datetime.fromisoformat('2020-12-08 09:00:00+01:00')
 PERIOD = '1d'
+hatching_datetime = STARTING_DATE + timedelta(days=20)
 
 client = DataFrameClient(host='incubator.local', database='incubator')
 
@@ -50,6 +54,9 @@ def generate_turner_graph():
 def serve_layout():
     return html.Div(children=[
         html.H1('Pollo-o-Matic!'),
+        html.H2('Hatching on {}.'.format(hatching_datetime.date())),
+        html.H2('{} days left'.format((hatching_datetime.date()
+                                      - date.today()).days)),
         html.Div(children=[
             html.Video(id='video', width="100%", autoPlay=True,
                        controls=True)]),
