@@ -10,7 +10,7 @@ import plotly.express as px
 from influxdb import DataFrameClient
 from dash.dependencies import Input, Output
 
-STARTING_DATE = datetime.fromisoformat('2020-12-08 09:00:00+01:00')
+STARTING_DATE = datetime.fromisoformat('2020-12-12 09:10:00+01:00')
 PERIOD = '1d'
 hatching_datetime = STARTING_DATE + timedelta(days=20)
 
@@ -51,6 +51,27 @@ def generate_turner_graph():
     return graph
 
 
+def get_turning_time():
+    result = client.query('select last(time_left) from turner')
+    try:
+        df = list(result.values())[0]
+        (label, measure) = list(df.items())[0]
+        entry = measure.to_dict()
+        (time_stamp, time_left) = entry.popitem()
+        turning_date = time_stamp + timedelta(seconds=time_left)
+    except IndexError:
+        return html.P('No egg turner data')
+
+    return html.H3('Next eggs rotation at {} CET'
+                   .format(turning_date.astimezone(tz.gettz('Europe/Madrid'))
+                           .strftime('%H:%M:%S')))
+    # return html.Div(children=[
+    #     html.H3(turning_date.astimezone(tz.gettz('Europe/Madrid'))),
+    #     html.H3("Eggs turning in {}"
+    #             .format(turning_date.to_pydatetime()
+    #                     - datetime.now(tz.gettz('Europe/Madrid'))))])
+
+
 def generate_uptime_graph():
     result = client.query('select * from uptime where time > now()-' + PERIOD)
     try:
@@ -68,9 +89,9 @@ def generate_uptime_graph():
 def serve_layout():
     return html.Div(children=[
         html.H1('Pollo-o-Matic!'),
-        html.H2('Hatching on {}.'.format(hatching_datetime.date())),
-        html.H2('{} days left'.format((hatching_datetime.date()
-                                      - date.today()).days)),
+        html.H2('Hatching on {}. {} days left'
+                .format(hatching_datetime.date(), (hatching_datetime.date() - date.today()).days)),
+        get_turning_time(),
         html.Div(children=[
             html.Video(id='video', width="100%", autoPlay=True,
                        controls=True)]),
