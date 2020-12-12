@@ -88,9 +88,11 @@ def generate_uptime_graph():
 
 def serve_layout():
     return html.Div(children=[
+        dcc.Location(id='url', refresh=False),
         html.H1('Pollo-o-Matic!'),
         html.H2('Hatching on {}. {} days left'
-                .format(hatching_datetime.date(), (hatching_datetime.date() - date.today()).days)),
+                .format(hatching_datetime.date(), (hatching_datetime.date()
+                                                   - date.today()).days)),
         get_turning_time(),
         html.Div(children=[
             html.Video(id='video', width="100%", autoPlay=True,
@@ -99,8 +101,7 @@ def serve_layout():
                                    'Heater Power'),
         generate_measurement_graph('humidity', 'Humidity', '%',
                                    'Humidifier Power'),
-        # generate_turner_graph(),
-        # generate_uptime_graph()
+        html.Div(id='advanced')
     ])
 
 
@@ -112,6 +113,17 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets,
 app.title = 'Pollo-o-Matic!'
 
 app.layout = serve_layout
+
+
+@app.callback(dash.dependencies.Output('advanced', 'children'),
+              [dash.dependencies.Input('url', 'pathname')])
+def display_advanced(pathname):
+    if pathname == '/advanced':
+        return [generate_turner_graph(),
+                generate_uptime_graph()]
+    else:
+        return
+
 
 app.clientside_callback(
     """
