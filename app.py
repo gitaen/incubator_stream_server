@@ -99,8 +99,8 @@ def serve_layout():
                                    'Heater Power'),
         generate_measurement_graph('humidity', 'Humidity', '%',
                                    'Humidifier Power'),
-        generate_turner_graph(),
-        generate_uptime_graph()
+        # generate_turner_graph(),
+        # generate_uptime_graph()
     ])
 
 
