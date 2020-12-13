@@ -27,9 +27,16 @@ def generate_measurement_graph(measure, title, units, actuator):
     else:
         df.index = df.index.tz_convert('Europe/Madrid')
         measure_df = df[['value', 'target']]
+        measure_df.columns = ['Actual', 'Target']
         power_df = df[['power']].apply(lambda x: x * 100 / 255)
-        fig = px.line(measure_df, title=title)
-        power_fig = px.line(power_df, title=actuator)
+        power_df.columns = ['Power']
+        fig = px.line(measure_df, title=title, labels={
+            'value': units,
+            'index': 'Time',
+            'variable': 'Temperature'})
+        power_fig = px.line(power_df, title=actuator, labels={
+            'value': '%',
+            'variable': ''})
         graph = html.Div(children=[
             dcc.Graph(id=measure, figure=fig),
             dcc.Graph(id=measure + 'power', figure=power_fig)])
@@ -97,9 +104,9 @@ def serve_layout():
         html.Div(children=[
             html.Video(id='video', width="100%", autoPlay=True,
                        controls=True)]),
-        generate_measurement_graph('temperature', 'Temperature', 'C',
+        generate_measurement_graph('temperature', 'Temperature', 'ºC',
                                    'Heater Power'),
-        generate_measurement_graph('humidity', 'Humidity', '%',
+        generate_measurement_graph('humidity', 'Humidity', '%RH',
                                    'Humidifier Power'),
         html.Div(id='advanced')
     ])
