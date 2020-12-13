@@ -106,7 +106,7 @@ def serve_layout():
                        controls=True)]),
         generate_measurement_graph('temperature', 'Temperature', 'ºC',
                                    'Heater Power'),
-        generate_measurement_graph('humidity', 'Humidity', '%RH',
+        generate_measurement_graph('humidity', 'Relative Humidity', '%RH',
                                    'Humidifier Power'),
         html.Div(id='advanced')
     ])
