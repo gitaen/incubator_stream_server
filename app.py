@@ -69,7 +69,7 @@ def get_turning_time():
     except IndexError:
         return html.P('No egg turner data')
 
-    return html.H3('Next eggs rotation at {} CET'
+    return html.H3('Next egg rotation at {} CET'
                    .format(turning_date.astimezone(tz.gettz('Europe/Madrid'))
                            .strftime('%H:%M:%S')))
     # return html.Div(children=[
