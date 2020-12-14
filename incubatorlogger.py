@@ -21,7 +21,7 @@ splitted_line = line.split()
  humidSensor, humidTarget, humidPower, humidStatus,
  turnerState, turnerActive, turnerTimeLeft, turnerStatus) = splitted_line[0:13]
 
-if len(splitted_line) > 12:
+if len(splitted_line) > 13:
     freeMemory = splitted_line[13]
 else:
     freeMemory = None
