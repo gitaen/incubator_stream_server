@@ -8,9 +8,11 @@ ExecStartPre=/bin/mkdir -p /var/run/ffmpeg
 ExecStartPre=/bin/chown www-data.www-data /var/run/ffmpeg
 ExecStart=/usr/bin/ffmpeg $@ -hide_banner -f v4l2 -video_size 1280x720 -framerate 30 -input_format yuyv422 -i /dev/video0 \
        -c:v h264_omx -profile:v main -sc_threshold 0 -g 60 -keyint_min 60 \
-       -hls_time 4 -hls_flags delete_segments \
+       -hls_time 4 -hls_list_size 2 -hls_flags delete_segments \
        -b:v:0 800k -filter:v:0 scale=w=640:h=360:force_original_aspect_ratio=decrease -r:v:0 25\
+       -filter:v:0 drawtext="x=w/100:y=h*dar/100:fontfile=FreeSans.ttf:text='%{localtime}':fontcolor=white:box=1:boxcolor=black@0.5:boxborderw=5"\
        -b:v:1 3500k -filter:v:1 scale=w=1280:h=720:force_original_aspect_ratio=decrease -r:v:1 30\
+       -filter:v:1 drawtext="x=w/100:y=h*dar/100:fontfile=FreeSans.ttf:text='%{localtime}':fontcolor=white:box=1:boxcolor=black@0.5:boxborderw=5"\
        -map 0:v -map 0:v -var_stream_map "v:0 v:1" -master_pl_name index.m3u8 -hls_segment_filename "/var/run/ffmpeg/segment_%%v_%%03d.ts" "/var/run/ffmpeg/playlist_%%v.m3u8"
 Restart=always
 RestartSec=30s
