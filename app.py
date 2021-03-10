@@ -10,7 +10,7 @@ import plotly.express as px
 from influxdb import DataFrameClient
 from dash.dependencies import Input, Output
 
-STARTING_DATE = datetime.fromisoformat('2020-12-12 09:10:00+01:00')
+STARTING_DATE = datetime.fromisoformat('2021-03-08 00:00:00+01:00')
 PERIOD = '1d'
 hatching_datetime = STARTING_DATE + timedelta(days=20)
 
@@ -58,25 +58,14 @@ def generate_turner_graph():
     return graph
 
 
-def get_turning_time():
+def get_turning_datetime():
     result = client.query('select last(time_left) from turner')
-    try:
-        df = list(result.values())[0]
-        (label, measure) = list(df.items())[0]
-        entry = measure.to_dict()
-        (time_stamp, time_left) = entry.popitem()
-        turning_date = time_stamp + timedelta(seconds=time_left)
-    except IndexError:
-        return html.P('No egg turner data')
 
-    return html.H3('Next egg rotation at {} CET'
-                   .format(turning_date.astimezone(tz.gettz('Europe/Madrid'))
-                           .strftime('%H:%M:%S')))
-    # return html.Div(children=[
-    #     html.H3(turning_date.astimezone(tz.gettz('Europe/Madrid'))),
-    #     html.H3("Eggs turning in {}"
-    #             .format(turning_date.to_pydatetime()
-    #                     - datetime.now(tz.gettz('Europe/Madrid'))))])
+    df = list(result.values())[0]
+    (label, measure) = list(df.items())[0]
+    entry = measure.to_dict()
+    (time_stamp, time_left) = entry.popitem()
+    return time_stamp + timedelta(seconds=time_left)
 
 
 def generate_uptime_graph():
@@ -100,7 +89,9 @@ def serve_layout():
         html.H2('Hatching on {}. {} days left'
                 .format(hatching_datetime.date(), (hatching_datetime.date()
                                                    - date.today()).days)),
-        get_turning_time(),
+        html.Div(children=[
+            dcc.Interval(id='nextTurnInterval'),
+            html.Div(id='nextTurn')]),
         html.Div(children=[
             html.Video(id='video', width="100%", autoPlay=True,
                        controls=True)]),
@@ -120,6 +111,32 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets,
 app.title = 'Pollo-o-Matic!'
 
 app.layout = serve_layout
+
+
+@app.callback(dash.dependencies.Output('nextTurnInterval', 'interval'),
+              [dash.dependencies.Input('nextTurnInterval', 'n_intervals')])
+def get_turning_interval(n_intervals):
+    return ((get_turning_datetime().to_pydatetime()
+            - datetime.now(tz.gettz('Europe/Madrid'))).total_seconds() + 60) * 1000
+
+
+@app.callback(dash.dependencies.Output('nextTurn', 'children'),
+              [dash.dependencies.Input('nextTurnInterval', 'n_intervals')])
+def get_turning_time(n_intervals):
+    try:
+        turning_date=get_turning_datetime()
+    except IndexError:
+        return html.P('No egg turner data')
+
+    return html.H3('Next egg rotation at {} CET'
+                   .format(turning_date.astimezone(tz.gettz('Europe/Madrid'))
+                           .strftime('%H:%M:%S')))
+    # return html.Div(children=[
+    #     html.H3(turning_date.astimezone(tz.gettz('Europe/Madrid'))),
+    #     html.H3("Eggs turning in {}"
+    #             .format(turning_date.to_pydatetime()
+    #                     - datetime.now(tz.gettz('Europe/Madrid'))))])
+
 
 
 @app.callback(dash.dependencies.Output('advanced', 'children'),
